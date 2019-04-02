@@ -18,9 +18,12 @@ import Salesforce.RemoteAction.Types (RemoteActionError(..), Visualforce)
 -- | Based on the action type we can determine what controller should be call and what are the args that this controller accepts
 -- | and also what type of result it returns. 
 -- | Example: 
--- |    data GetPCMRecords = GetPCMRecords
+-- |
+-- |```purescript
+-- |data GetPCMRecords = GetPCMRecords
 -- | 
--- |    instance remoteActionGetPCMRecords :: RemoteAction GetPCMRecords "PCMController.getRecords" args result
+-- |instance remoteActionGetPCMRecords :: RemoteAction GetPCMRecords "PCMController.getRecords" args result
+-- |```
 -- | 
 -- | `args` and `result` should be concrete types with Encode and Decode instance respectively.
 class (IsSymbol ctrl)
@@ -35,11 +38,14 @@ instance monadRemoteAction :: (MonadAff m, MonadError RemoteActionError m, Monad
 
 -- | Function that invoke the action defined by referring to contraints which holds details about the correct controller to invoke.
 -- | Example: 
--- |    data PCMRequests = ..
 -- |
--- |    data CreatePCMRequests = CreatePCMRequests
+-- |```purescript 
+-- |data PCMRequests = ..
+-- |
+-- |data CreatePCMRequests = CreatePCMRequests
 -- | 
--- |    instance remoteActionCreatePCMs :: RemoteAction CreatePCMRequests "PCMMassController.createRecords" PCMRequests Unit
+-- |instance remoteActionCreatePCMs :: RemoteAction CreatePCMRequests "PCMMassController.createRecords" PCMRequests Unit
+-- |```
 -- |
 -- |    createPCMRequest :: Visualforce -> PCMRequests -> Aff (Either RemoteActionError Unit)
 -- |    createPCMRequest vf rec =  runReaderT (runExceptT $ invokeAction CreatePCMRequests rec) vf

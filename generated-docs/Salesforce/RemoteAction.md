@@ -11,9 +11,12 @@ The action type will be a regular data type that one can define which will give 
 Based on the action type we can determine what controller should be call and what are the args that this controller accepts
 and also what type of result it returns. 
 Example: 
-   data GetPCMRecords = GetPCMRecords
 
-   instance remoteActionGetPCMRecords :: RemoteAction GetPCMRecords "PCMController.getRecords" args result
+```purescript
+data GetPCMRecords = GetPCMRecords
+
+instance remoteActionGetPCMRecords :: RemoteAction GetPCMRecords "PCMController.getRecords" args result
+```
 
 `args` and `result` should be concrete types with Encode and Decode instance respectively.
 
@@ -36,11 +39,14 @@ invokeAction :: forall act ctrl args res m. RemoteAction act ctrl args res => En
 
 Function that invoke the action defined by referring to contraints which holds details about the correct controller to invoke.
 Example: 
-   data PCMRequests = ..
 
-   data CreatePCMRequests = CreatePCMRequests
+```purescript 
+data PCMRequests = ..
 
-   instance remoteActionCreatePCMs :: RemoteAction CreatePCMRequests "PCMMassController.createRecords" PCMRequests Unit
+data CreatePCMRequests = CreatePCMRequests
+
+instance remoteActionCreatePCMs :: RemoteAction CreatePCMRequests "PCMMassController.createRecords" PCMRequests Unit
+```
 
    createPCMRequest :: Visualforce -> PCMRequests -> Aff (Either RemoteActionError Unit)
    createPCMRequest vf rec =  runReaderT (runExceptT $ invokeAction CreatePCMRequests rec) vf
