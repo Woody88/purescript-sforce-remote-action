@@ -13,9 +13,10 @@ import Foreign.Class (class Decode, class Encode, decode, encode)
 import Salesforce.RemoteAction.Internal (apexRequest)
 import Salesforce.RemoteAction.Types (RemoteActionError(..), Visualforce)
 
--- | A type class which represent a RemoteAction that has types for an action controller arguments and result 
--- | The action type will be a regular data type that one can define which will give meaning to the action.
--- | Based on the action type we can determine what controller should be call and what are the args that this controller accepts
+-- | A type class which represents a RemoteAction that has types for an action, controller, arguments, and result.
+-- | The controller name is a `Symbol` not `String` 
+-- | The action type is a regular data type that one can define which will give meaning to the action.
+-- | Based on the action type we can determine what controller should be called, what are the args that this controller accepts,
 -- | and also what type of result it returns. 
 -- | Example: 
 -- |
