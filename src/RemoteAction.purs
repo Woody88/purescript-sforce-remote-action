@@ -13,10 +13,10 @@ import Foreign.Class (class Decode, class Encode, decode, encode)
 import Salesforce.RemoteAction.Internal (apexRequest)
 import Salesforce.RemoteAction.Types (RemoteActionError(..), Visualforce)
 
--- | A type class which represents a RemoteAction that has types for an action, controller, arguments, and result.
+-- | Credits to Robert Poter (robertdp github name) who came up with this approach. This type class represents a RemoteAction that has types for an action, controller, arguments, and result.
 -- | The controller name is a `Symbol` not `String` 
 -- | The action type is a regular data type that one can define which will give meaning to the action.
--- | Based on the action type we can determine what controller should be called, what are the args that this controller accepts,
+-- | Based on Robert's approach based on the action type we can determine what controller should be called, what are the args that this controller accepts,
 -- | and also what type of result it returns. 
 -- | Example: 
 -- |
@@ -31,12 +31,6 @@ class (IsSymbol ctrl)
     <= RemoteAction act ctrl args res
     | act -> ctrl args res
 
--- A typeclass with usefull Monad contraints
-class (MonadAff m, MonadError RemoteActionError m, MonadReader Visualforce m)
-    <= MonadRemoteAction m
- 
-instance monadRemoteAction :: (MonadAff m, MonadError RemoteActionError m, MonadReader Visualforce m) => MonadRemoteAction m
-
 -- | Function that invoke the action defined by referring to contraints which holds details about the correct controller to invoke.
 -- | Example: 
 -- |
@@ -48,14 +42,16 @@ instance monadRemoteAction :: (MonadAff m, MonadError RemoteActionError m, Monad
 -- |instance remoteActionCreatePCMs :: RemoteAction CreatePCMRequests "PCMMassController.createRecords" PCMRequests Unit
 -- |```
 -- |
--- |    createPCMRequest :: Visualforce -> PCMRequests -> Aff (Either RemoteActionError Unit)
--- |    createPCMRequest vf rec =  runReaderT (runExceptT $ invokeAction CreatePCMRequests rec) vf
+-- |createPCMRequest :: Visualforce -> PCMRequests -> Aff (Either RemoteActionError Unit)
+-- |createPCMRequest vf rec =  runReaderT (runExceptT $ invokeAction CreatePCMRequests rec) vf
 invokeAction
   :: forall act ctrl args res m
    . RemoteAction act ctrl args res
+  => MonadAff m
+  => MonadError RemoteActionError m 
+  => MonadReader Visualforce m
   => Encode args 
   => Decode res
-  => MonadRemoteAction m
   => act
   -> args
   -> m res
