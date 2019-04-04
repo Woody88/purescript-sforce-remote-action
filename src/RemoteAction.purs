@@ -90,7 +90,7 @@ foreign import _callApex
     :: forall conf e t b. EffectFn7 JSVisualforce String Foreign conf (e -> b) (e -> t -> b) (Foreign -> b) (EffectFnAff b)
 
 
--- | Credits to Robert Porter (robertdp github name) who came up with this approach. This type class represents a RemoteAction that has types for an action, controller, arguments, and result.
+-- | Credit to Robert Porter (robertdp github name) who came up with this approach. This type class represents a RemoteAction that has types for an action, controller, arguments, and result.
 -- | The controller name is a `Symbol` not `String` 
 -- | The action type is a regular data type that one can define which will give meaning to the action.
 -- | Based on Robert's approach based on the action type we can determine what controller should be called, what are the args that this controller accepts,
