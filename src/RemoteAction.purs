@@ -1,17 +1,94 @@
-module Salesforce.RemoteAction where 
+module Salesforce.RemoteAction
+    ( Visualforce
+    , ApexController
+    , ApexControllerArgs
+    , VisualforceConfProp
+    , ErrorMsg
+    , ErrorTrace
+    , RemoteActionError (..)
+    , class RemoteAction 
+    , defaultConfig
+    , getVisualforce
+    , apexRequest
+    , invokeAction
+    )
+    where 
 
 import Prelude
 
 import Control.Monad.Error.Class (class MonadError, throwError)
 import Control.Monad.Except (runExcept)
 import Control.Monad.Reader (class MonadReader, ask)
+import Control.Plus (empty)
 import Data.Bifunctor (lmap)
-import Data.Either (either)
+import Data.Either (Either, either)
+import Data.Maybe (Maybe)
 import Data.Symbol (class IsSymbol, SProxy(..), reflectSymbol)
+import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
+import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
+import Effect.Class (liftEffect)
+import Effect.Uncurried (EffectFn7, runEffectFn7)
+import Foreign (Foreign)
 import Foreign.Class (class Decode, class Encode, decode, encode)
-import Salesforce.RemoteAction.Internal (apexRequest)
-import Salesforce.RemoteAction.Types (RemoteActionError(..), Visualforce)
+
+-- | Represents Salesforce's Visualforce remote action object.
+foreign import data JSVisualforce :: Type 
+
+-- | Data type which holds remote action visualforce object and config details
+data Visualforce = Visualforce JSVisualforce { | VisualforceConfProp }
+
+-- | Name of apex controller including namespace (fully qualified remote action name)
+-- | https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_js_remoting_namespaces.htm
+type ApexController = String 
+
+type ApexControllerArgs = Foreign
+
+-- | Configuration data structure details based on Visualforce Developer Guide 
+-- | https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_js_remoting_configuring_request.htm
+type VisualforceConfProp 
+    = ( buffer :: Boolean
+      , escape :: Boolean
+      , timeout :: Int 
+      ) 
+
+type ErrorMsg   = String 
+type ErrorTrace = String 
+
+-- | Type for Remote Action errors
+data RemoteActionError 
+    = RemoteActionError ErrorMsg
+    | RemoteActionException ErrorMsg ErrorTrace
+
+
+-- | Configuration details based on Visualforce Developer Guide 
+-- | https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_js_remoting_configuring_request.htm
+defaultConfig :: { | VisualforceConfProp } 
+defaultConfig = {buffer: true, escape: true, timeout: 30000}
+
+-- | Returns a Visualforce type with configs provided
+getVisualforce :: { | VisualforceConfProp } -> Maybe Visualforce
+getVisualforce config =  flip Visualforce config <$> _getVisualforce pure empty
+
+-- | Function which performs requests using Visuaforce data 
+apexRequest :: Visualforce -> ApexController -> ApexControllerArgs -> Aff (Either RemoteActionError Foreign)
+apexRequest (Visualforce vf c) s args = do
+   effectFnAff <- liftEffect $ runEffectFn7 _callApex vf s args c (throwError <<< RemoteActionError) (\e t -> throwError $ RemoteActionException e t) pure 
+   fromEffectFnAff effectFnAff
+
+renderRemoteActionError :: RemoteActionError -> String 
+renderRemoteActionError (RemoteActionError e ) = e
+renderRemoteActionError (RemoteActionException e _) = e
+
+renderRemoteActionError' :: RemoteActionError -> String 
+renderRemoteActionError' (RemoteActionError e) = e
+renderRemoteActionError' (RemoteActionException e t) = e <> "\n Trace: " <> t
+
+foreign import _getVisualforce :: forall a. (a -> Maybe JSVisualforce) -> Maybe JSVisualforce -> Maybe JSVisualforce
+
+foreign import _callApex 
+    :: forall conf e t b. EffectFn7 JSVisualforce String Foreign conf (e -> b) (e -> t -> b) (Foreign -> b) (EffectFnAff b)
+
 
 -- | Credits to Robert Porter (robertdp github name) who came up with this approach. This type class represents a RemoteAction that has types for an action, controller, arguments, and result.
 -- | The controller name is a `Symbol` not `String` 
@@ -60,7 +137,7 @@ invokeAction _ args = do
 
     visualforce  <- ask
     eitherResult <- liftAff $ apexRequest visualforce ctrl (encode args) 
-    
+
     either throwError pure (eitherResult >>= decodeResult)
 
 
