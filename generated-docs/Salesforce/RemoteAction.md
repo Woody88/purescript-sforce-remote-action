@@ -121,9 +121,9 @@ data PCMRequests = ..
 data CreatePCMRequests = CreatePCMRequests
 
 instance remoteActionCreatePCMs :: RemoteAction CreatePCMRequests "PCMMassController.createRecords" PCMRequests Unit
-```
 
 createPCMRequest :: Visualforce -> PCMRequests -> Aff (Either RemoteActionError Unit)
 createPCMRequest vf rec =  runReaderT (runExceptT $ invokeAction CreatePCMRequests rec) vf
+```
 
 
