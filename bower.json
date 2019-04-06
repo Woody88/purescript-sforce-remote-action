@@ -1,0 +1,27 @@
+{
+  "name": "purescript-sforce-remote-action",
+  "homepage": "https://github.com/Woody88/purescript-sforce-remote-action",
+  "authors": [
+    "Woodson Delhia <woodsondelhia88@gmail.com>"
+  ],
+  "description": "Purescript bindings for Salesforce Remote Action",
+  "main": "",
+  "keywords": [
+    "Salesforce",
+    "RemoteAction",
+    "Purescript",
+    "Visualforce",
+    "Page"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies":{
+    "purescript-react-basic": "^v7.0.0"
+  }
+}
