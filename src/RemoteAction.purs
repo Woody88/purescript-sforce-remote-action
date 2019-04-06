@@ -6,6 +6,7 @@ module Salesforce.RemoteAction
     , ErrorMsg
     , ErrorTrace
     , RemoteActionError (..)
+    , class MonadRemoteAction 
     , class RemoteAction 
     , defaultConfig
     , getVisualforce
@@ -70,9 +71,9 @@ defaultConfig = {buffer: true, escape: true, timeout: 30000}
 getVisualforce :: { | VisualforceConfProp } -> Maybe Visualforce
 getVisualforce config =  flip Visualforce config <$> _getVisualforce pure empty
 
--- | Function which performs requests using Visuaforce data 
-apexRequest :: Visualforce -> ApexController -> ApexControllerArgs -> Aff (Either RemoteActionError Foreign)
-apexRequest (Visualforce vf c) s args = do
+-- | Function which performs requests using Visuaforce (JS Object) created by Salesforce platform
+callApex :: Visualforce -> ApexController -> ApexControllerArgs -> Aff (Either RemoteActionError Foreign)
+callApex (Visualforce vf c) s args = do
    effectFnAff <- liftEffect $ runEffectFn7 _callApex vf s args c (throwError <<< RemoteActionError) (\e t -> throwError $ RemoteActionException e t) pure 
    fromEffectFnAff effectFnAff
 
@@ -88,6 +89,27 @@ foreign import _getVisualforce :: forall a. (a -> Maybe JSVisualforce) -> Maybe 
 
 foreign import _callApex 
     :: forall conf e t b. EffectFn7 JSVisualforce String Foreign conf (e -> b) (e -> t -> b) (Foreign -> b) (EffectFnAff b)
+
+
+-- | Remote Action capability Monad. This also gives flexibily to define our own Visualforce object for testing.
+class Monad m <= MonadRemoteAction m where 
+    apexRequest :: forall args result.
+        Encode args 
+        => Decode result 
+        => Visualforce 
+        -> ApexController 
+        -> args
+        -> m (Either RemoteActionError result)
+
+
+-- | MonadRemoactionAction instance for Aff 
+instance monadRemoteActionAff :: MonadRemoteAction Aff where 
+    apexRequest vf ctrl args = do 
+        let decodeResult = lmap (RemoteActionError <<< show) <<< runExcept <<< decode 
+        
+        eitherResult <- callApex vf ctrl (encode args) 
+
+        pure $ eitherResult >>= decodeResult
 
 
 -- | Credit to Robert Porter (robertdp github name) who came up with this approach. This type class represents a RemoteAction that has types for an action, controller, arguments, and result.
@@ -122,10 +144,11 @@ class RemoteAction act (ctrl :: Symbol) args res | act -> ctrl args res
 invokeAction
   :: forall act ctrl args res m.
     RemoteAction act ctrl args res
-    => IsSymbol ctrl 
+    => MonadRemoteAction m 
     => MonadAff m
     => MonadError RemoteActionError m 
     => MonadReader Visualforce m
+    => IsSymbol ctrl 
     => Encode args 
     => Decode res
     => act
@@ -133,11 +156,10 @@ invokeAction
     -> m res
 invokeAction _ args = do 
     let ctrl = reflectSymbol $ SProxy :: _ ctrl
-        decodeResult f = lmap (RemoteActionError <<< show) $ runExcept <<< decode $ f
 
     visualforce  <- ask
-    eitherResult <- liftAff $ apexRequest visualforce ctrl (encode args) 
-
-    either throwError pure (eitherResult >>= decodeResult)
+    eitherResult <- liftAff $ apexRequest visualforce ctrl args
+ 
+    either throwError pure eitherResult 
 
 
