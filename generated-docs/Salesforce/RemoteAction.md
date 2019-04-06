@@ -54,6 +54,20 @@ data RemoteActionError
 
 Type for Remote Action errors
 
+#### `MonadRemoteAction`
+
+``` purescript
+class (Monad m) <= MonadRemoteAction m  where
+  apexRequest :: forall args result. Encode args => Decode result => Visualforce -> ApexController -> args -> m (Either RemoteActionError result)
+```
+
+Remote Action capability Monad. This also gives flexibily to define our own Visualforce object for testing.
+
+##### Instances
+``` purescript
+MonadRemoteAction Aff
+```
+
 #### `RemoteAction`
 
 ``` purescript
@@ -92,18 +106,10 @@ getVisualforce :: {  | VisualforceConfProp } -> Maybe Visualforce
 
 Returns a Visualforce type with configs provided
 
-#### `apexRequest`
-
-``` purescript
-apexRequest :: Visualforce -> ApexController -> ApexControllerArgs -> Aff (Either RemoteActionError Foreign)
-```
-
-Function which performs requests using Visuaforce data 
-
 #### `invokeAction`
 
 ``` purescript
-invokeAction :: forall act ctrl args res m. RemoteAction act ctrl args res => IsSymbol ctrl => MonadAff m => MonadError RemoteActionError m => MonadReader Visualforce m => Encode args => Decode res => act -> args -> m res
+invokeAction :: forall act ctrl args res m. RemoteAction act ctrl args res => MonadRemoteAction m => MonadAff m => MonadError RemoteActionError m => MonadReader Visualforce m => IsSymbol ctrl => Encode args => Decode res => act -> args -> m res
 ```
 
 Function that invoke the action defined by referring to contraints which holds details about the correct controller to invoke.
