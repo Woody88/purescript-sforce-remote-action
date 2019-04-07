@@ -92,24 +92,36 @@ foreign import _callApex
 
 
 -- | Remote Action capability Monad. This also gives flexibily to define our own Visualforce object for testing.
-class Monad m <= MonadRemoteAction m where 
-    apexRequest :: forall args result.
-        Encode args 
-        => Decode result 
-        => Visualforce 
-        -> ApexController 
+class (Monad m, RemoteAction act ctrl args result) <= MonadRemoteAction act ctrl args result m | act -> ctrl args result where 
+    apexRequest :: 
+        act
+        -> Visualforce 
         -> args
         -> m (Either RemoteActionError result)
 
 
 -- | MonadRemoactionAction instance for Aff 
-instance monadRemoteActionAff :: MonadRemoteAction Aff where 
-    apexRequest vf ctrl args = do 
-        let decodeResult = lmap (RemoteActionError <<< show) <<< runExcept <<< decode 
-        
-        eitherResult <- callApex vf ctrl (encode args) 
+instance monadRemoteActionAff :: 
+    ( RemoteAction act ctrl args result
+    , Encode args
+    , Decode result
+    , IsSymbol ctrl 
+    ) => MonadRemoteAction act ctrl args result Aff where 
+    apexRequest _ visualforce args = do 
+        let ctrl = reflectSymbol $ SProxy :: _ ctrl
+            decodeResult = lmap (RemoteActionError <<< show) <<< runExcept <<< decode
 
+        eitherResult <- liftAff $ callApex visualforce ctrl (encode args)
+    
         pure $ eitherResult >>= decodeResult
+
+-- --     apexRequest :: Visualforce -> ApexController -> args -> Aff (Either RemoteActionError result) 
+--     apexRequest vf ctrl args = do 
+--         let decodeResult = lmap (RemoteActionError <<< show) <<< runExcept <<< decode 
+        
+--         eitherResult <- callApex vf ctrl (encode args) 
+
+--         pure $ eitherResult >>= decodeResult
 
 
 -- | Credit to Robert Porter (robertdp github name) who came up with this approach. This type class represents a RemoteAction that has types for an action, controller, arguments, and result.
@@ -143,8 +155,7 @@ class RemoteAction act (ctrl :: Symbol) args res | act -> ctrl args res
 -- |```
 invokeAction
   :: forall act ctrl args res m.
-    RemoteAction act ctrl args res
-    => MonadRemoteAction m 
+    MonadRemoteAction act ctrl args res m 
     => MonadAff m
     => MonadError RemoteActionError m 
     => MonadReader Visualforce m
@@ -154,11 +165,9 @@ invokeAction
     => act
     -> args
     -> m res
-invokeAction _ args = do 
-    let ctrl = reflectSymbol $ SProxy :: _ ctrl
-
+invokeAction act args = do 
     visualforce  <- ask
-    eitherResult <- liftAff $ apexRequest visualforce ctrl args
+    eitherResult <- liftAff $ apexRequest act visualforce args
  
     either throwError pure eitherResult 
 
