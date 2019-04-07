@@ -99,7 +99,6 @@ class (Monad m, RemoteAction act ctrl args result) <= MonadRemoteAction act ctrl
         -> args
         -> m (Either RemoteActionError result)
 
-
 -- | MonadRemoactionAction instance for Aff 
 instance monadRemoteActionAff :: 
     ( RemoteAction act ctrl args result
