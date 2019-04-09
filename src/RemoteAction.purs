@@ -126,12 +126,13 @@ invokeAction
     RemoteAction act ctrl args res 
     => MonadReader Visualforce m
     => MonadAff m
+    => MonadError RemoteActionError m
     => IsSymbol ctrl 
     => Encode args 
     => Decode res
     => act
     -> args
-    -> m (Either RemoteActionError res)
+    -> m res
 invokeAction _ args = do 
     let ctrl = reflectSymbol $ SProxy :: _ ctrl
         decodeResult f = lmap (RemoteActionError <<< show) $ runExcept <<< decode $ f
@@ -139,7 +140,8 @@ invokeAction _ args = do
     visualforce  <- ask
     eitherResult <- liftAff $ callApex visualforce ctrl (encode args)
 
-    pure $ eitherResult >>= decodeResult  
+    either throwError pure (eitherResult >>= decodeResult)
+
  
     
 

@@ -10,15 +10,11 @@ exports._getVisualforceMock = function(just){
 
                     if (fullyQualifiedApexMethodName === "MyController.myControllerFunctionName"){
                         var result = { controller: "MyController.myControllerFunctionName", result: apexMethodParameters };
-                        setTimeout(function(){
-                            responseHandler(result, {status: true, message: "no error", type: "rpc", where: ""});
-                        }, 500);
+                        responseHandler(result, {status: true, message: "no error", type: "rpc", where: ""});
                     }
                     else {
-                        var result = { controller: "", result: apexMethodParameters };
-                        setTimeout(function(){
-                            responseHandler(result, {status: false, message: "Controller Not Found", type: "exception", where: "No Apex Controller"});
-                        }, 500);
+                        var result = { myController: "", result: apexMethodParameters };
+                        responseHandler(result, {status: false, message: "Apex Controller Wrong", where: "No Apex Controller", type: "exception"});
                     }
                 } 
 

@@ -2,9 +2,9 @@ module Test.RemoteActionSpec where
 
 import Prelude
 
+import Control.Monad.Error.Class (try)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Reader (runReaderT)
-import Control.Monad.Error.Class (try)
 import Control.Plus (empty)
 import Data.Bifunctor (lmap)
 import Data.Either (Either, isLeft)
@@ -32,10 +32,14 @@ spec =
 
     it "returns should return error on bad controller name" do
         let maybeVisualforce = getVisualforceMock RemoteAction.defaultConfig false
-        _ <- for maybeVisualforce \visualforce -> do 
+        case maybeVisualforce of 
+            Nothing -> fail "Expected Visualforce"
+            Just visualforce -> do 
                 callBadController <- badMyControllerFunction visualforce $ Args [1,2,3]
-                pure unit 
-        pure unit 
+                logShow $ lmap (RemoteAction.renderRemoteActionError) callBadController
+                (isLeft callBadController) `shouldEqual` true
+
+
 newtype Args = Args (Array Int)
 newtype Result = Result { myController :: String, result :: Args }
 
@@ -60,7 +64,7 @@ instance remoteActionBadMyControllerFunctionName :: RemoteAction BadMyController
 
 
 badMyControllerFunction :: Visualforce -> Args -> Aff (Either RemoteActionError Result)
-badMyControllerFunction vf rec =  runReaderT (RemoteAction.invokeAction BadMyControllerFunctionName rec) vf
+badMyControllerFunction vf rec =  runReaderT ( runExceptT (RemoteAction.invokeAction BadMyControllerFunctionName rec) ) vf
 
 getVisualforceMock :: { | VisualforceConfProp} -> Boolean -> Maybe Visualforce
 getVisualforceMock config b = flip Visualforce config <$> _getVisualforceMock pure empty b

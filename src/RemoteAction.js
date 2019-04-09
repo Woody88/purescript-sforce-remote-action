@@ -24,11 +24,12 @@ exports._callApex = function(Visualforce_,
                 onSuccess(success(result));
             } 
             else if(event.type === "exception"){
-                onSuccess(exception(event.message, event.where));
+                onSuccess(exception(event.message)(event.where));
             }
             else 
                 onSuccess(error(event.message));
         }
+        console.log("hellorrr");
 
         if (typeof Visualforce_ !== "undefined" && 
             typeof Visualforce_.remoting !== "undefined" &&
