@@ -4,9 +4,18 @@
 
 ``` purescript
 data Visualforce
+  = Visualforce JSVisualforce {  | VisualforceConfProp }
 ```
 
 Data type which holds remote action visualforce object and config details
+
+#### `JSVisualforce`
+
+``` purescript
+data JSVisualforce :: Type
+```
+
+Represents Salesforce's Visualforce remote action object.
 
 #### `ApexController`
 
@@ -54,20 +63,6 @@ data RemoteActionError
 
 Type for Remote Action errors
 
-#### `MonadRemoteAction`
-
-``` purescript
-class (Monad m) <= MonadRemoteAction m  where
-  apexRequest :: forall args result. Encode args => Decode result => Visualforce -> ApexController -> args -> m (Either RemoteActionError result)
-```
-
-Remote Action capability Monad. This also gives flexibily to define our own Visualforce object for testing.
-
-##### Instances
-``` purescript
-MonadRemoteAction Aff
-```
-
 #### `RemoteAction`
 
 ``` purescript
@@ -89,6 +84,18 @@ instance remoteActionGetPCMRecords :: RemoteAction GetPCMRecords "PCMController.
 
 `args` and `result` should be concrete types with Encode and Decode instance respectively.
 
+#### `renderRemoteActionError'`
+
+``` purescript
+renderRemoteActionError' :: RemoteActionError -> String
+```
+
+#### `renderRemoteActionError`
+
+``` purescript
+renderRemoteActionError :: RemoteActionError -> String
+```
+
 #### `defaultConfig`
 
 ``` purescript
@@ -106,10 +113,18 @@ getVisualforce :: {  | VisualforceConfProp } -> Maybe Visualforce
 
 Returns a Visualforce type with configs provided
 
+#### `callApex`
+
+``` purescript
+callApex :: Visualforce -> ApexController -> ApexControllerArgs -> Aff (Either RemoteActionError Foreign)
+```
+
+Function which performs requests using Visuaforce (JS Object) created by Salesforce platform
+
 #### `invokeAction`
 
 ``` purescript
-invokeAction :: forall act ctrl args res m. RemoteAction act ctrl args res => MonadRemoteAction m => MonadAff m => MonadError RemoteActionError m => MonadReader Visualforce m => IsSymbol ctrl => Encode args => Decode res => act -> args -> m res
+invokeAction :: forall act ctrl args res m. RemoteAction act ctrl args res => MonadReader Visualforce m => MonadAff m => MonadError RemoteActionError m => IsSymbol ctrl => Encode args => Decode res => act -> args -> m res
 ```
 
 Function that invoke the action defined by referring to contraints which holds details about the correct controller to invoke.
