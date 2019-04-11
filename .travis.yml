@@ -1,0 +1,13 @@
+dist: trusty
+sudo: required
+language: node_js
+sudo: required
+node_js: stable
+
+install:
+  - npm i bower 
+
+script:
+  - bower install 
+  - pulp build 
+  - pulp test

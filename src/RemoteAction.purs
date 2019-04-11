@@ -134,7 +134,7 @@ invokeAction
     -> args
     -> m res
 invokeAction _ args = do 
-    let ctrl = reflectSymbol $ SProxy :: _ ctrl
+    let ctrl = reflectSymbol $ SProxy :: SProxy ctrl
         decodeResult f = lmap (RemoteActionError <<< show) $ runExcept <<< decode $ f
 
     visualforce  <- ask
