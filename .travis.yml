@@ -5,10 +5,9 @@ sudo: required
 node_js: stable
 
 install:
-  - npm i bower 
-  - npm i purescript -g 
+  - npm install -g bower
+  - npm install
+  - bower install
 
 script:
-  - bower install 
-  - pulp build 
-  - pulp test
+  - npm run -s build
