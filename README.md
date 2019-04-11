@@ -1,6 +1,10 @@
 # purescript-sforce-remote-action
 
-[![Build Status](https://travis-ci.org/Woody88/purescript-sforce-remote-action.svg?branch=master)](https://travis-ci.org/Woody88/purescript-sforce-remote-action)
+[![Build Status](https://travis-ci.org/Woody88/purescript-sforce-remote-action.svg?branch=master)](https://travis-ci.org/Woody88/purescript-sforce-remote-action)<a href="https://pursuit.purescript.org/packages/purescript-sforce-remote-action">
+  <img src="https://pursuit.purescript.org/packages/purescript-sforce-remote-action/badge"
+       alt="purescript-sforce-remote-action on Pursuit">
+  </img>
+</a>
 
 Purescript bindings for [Salesforce Remote Actions](https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_js_remoting.htm#!)
 
