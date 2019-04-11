@@ -1,6 +1,5 @@
 {
   "name": "purescript-sforce-remote-action",
-  "version": "1.0.0",
   "description": "Purescript bindings for Salesforce Remote Action",
   "scripts": {
     "clean": "rimraf output && rimraf .pulp-cache",
