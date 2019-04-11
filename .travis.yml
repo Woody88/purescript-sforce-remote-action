@@ -10,3 +10,4 @@ install:
 script:
   - bower install 
   - npm run -s build
+  - npm run -s test
