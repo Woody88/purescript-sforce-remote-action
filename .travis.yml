@@ -6,6 +6,7 @@ node_js: stable
 
 install:
   - npm i bower 
+  - npm i purescript
 
 script:
   - bower install 
