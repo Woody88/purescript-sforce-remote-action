@@ -1,15 +1,26 @@
 {
-  "private": true,
+  "name": "purescript-sforce-remote-action",
+  "version": "1.0.0",
+  "description": "Purescript bindings for Salesforce Remote Action",
   "scripts": {
     "clean": "rimraf output && rimraf .pulp-cache",
     "build": "pulp build -- --censor-lib --strict",
     "test": "pulp test"
   },
-  "devDependencies": {},
   "dependencies": {
     "pulp": "^12.3.1",
     "purescript": "^0.12.4",
     "purescript-psa": "^0.7.3",
     "rimraf": "^2.6.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Woody88/purescript-sforce-remote-action.git"
+  },
+  "author": "Woodson Delhia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Woody88/purescript-sforce-remote-action/issues"
+  },
+  "homepage": "https://github.com/Woody88/purescript-sforce-remote-action#readme"
 }
