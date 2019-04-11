@@ -29,7 +29,6 @@ exports._callApex = function(Visualforce_,
             else 
                 onSuccess(error(event.message));
         }
-        console.log("hellorrr");
 
         if (typeof Visualforce_ !== "undefined" && 
             typeof Visualforce_.remoting !== "undefined" &&

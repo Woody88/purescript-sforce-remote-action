@@ -7,9 +7,9 @@ exports._getVisualforceMock = function(just){
                 return nothing;
             } else {
                 var invokeActionFunc = function(fullyQualifiedApexMethodName, apexMethodParameters, responseHandler, apexCallConfiguration){
-
-                    if (fullyQualifiedApexMethodName === "MyController.myControllerFunctionName"){
-                        var result = { controller: "MyController.myControllerFunctionName", result: apexMethodParameters };
+                    if (fullyQualifiedApexMethodName === "MyController.getAccounts"){
+                        var fakeAccounts = [{id: "someSFDCId1", name: "account1"}, {id: "someSFDCId2", name: "account2"}]
+                            result = {controller: fullyQualifiedApexMethodName, result: fakeAccounts};
                         responseHandler(result, {status: true, message: "no error", type: "rpc", where: ""});
                     }
                     else {
