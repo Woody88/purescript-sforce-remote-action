@@ -22,16 +22,18 @@
     "tests"
   ],
   "dependencies": {
-    "purescript-react-basic": "^v7.0.0",
+    "purescript-react-basic": "^v12.0.0",
     "purescript-foreign": "^v5.0.0",
     "purescript-effect": "^2.0.1",
     "purescript-aff": "^5.1.1",
-    "purescript-spec": "^3.1.0",
     "purescript-prelude": "^4.1.0",
     "purescript-console": "^4.2.0",
-    "purescript-psci-support": "^4.0.0",
-    "purescript-foreign-generic": "^8.1.0",
+    "purescript-foreign-generic": "^10.0.0",
     "purescript-transformers": "^4.2.0"
+  },
+  "devDependencies": {
+    "purescript-spec": "^3.1.0",
+    "purescript-psci-support": "^4.0.0"
   },
   "repository": {
     "type": "git",
